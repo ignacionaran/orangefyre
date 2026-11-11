@@ -93,6 +93,42 @@ html.is-loading body { overflow: hidden; height: 100%; }
   .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
   .lenis.lenis-stopped { overflow: hidden; }
   .lenis.lenis-scrolling iframe { pointer-events: none; }
+
+
+  /* ---- Logo ---- */
+  .logo-orange { display: inline-flex; }
+  .lo { display: inline-block; will-change: transform, opacity, filter; }
+  #logo-fyre {
+    position: fixed; top: 0; left: 0; z-index: 51; display: block; line-height: 1.4;
+    font-family: 'Anton', sans-serif; font-size: clamp(1.25rem, 2vw, 1.5rem);
+    text-transform: uppercase; letter-spacing: -.025em; color: #ff5a00; text-decoration: none;
+    transition: transform .3s cubic-bezier(.4,0,.2,1);
+  }
+  #fyre-text { display: inline-block; transform-origin: 50% 100%; animation: fyre-glow 2.8s ease-in-out infinite; }
+  #fyre-fire { position: absolute; pointer-events: none; }
+  @keyframes fyre-glow {
+    0%, 100% { text-shadow: 0 0 6px rgba(255,90,0,.35); }
+    50% { text-shadow: 0 0 14px rgba(255,120,20,.7), 0 0 3px rgba(255,200,100,.5); }
+  }
+  @media (prefers-reduced-motion: reduce) { #fyre-text { animation: none; } }
+
+  /* ---- Mobile performance ---- */
+  #studio-wrapper { overflow-x: clip !important; }
+  @media (hover: none), (max-width: 900px) {
+    /* mix-blend-mode on a fixed header and big blur filters are what make touch scrolling stutter */
+    #header {
+      mix-blend-mode: normal !important;
+      background: linear-gradient(to bottom, rgba(18,18,18,.88), rgba(18,18,18,0));
+      padding-top: 1.1rem !important; padding-bottom: 1.1rem !important;
+    }
+    .glow-blob {
+      filter: none !important; border-radius: 50% !important;
+      background: radial-gradient(closest-side, rgba(255,90,0,.30), rgba(255,90,0,0)) !important;
+    }
+    .backdrop-blur-sm { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+    [style*="drop-shadow"], .drop-shadow-md { filter: none !important; }
+    [style*="text-shadow: 0 0 40px"] { text-shadow: 0 0 22px rgba(255,90,0,.4) !important; }
+  }
 </style>
 </head>
 <body>
@@ -109,9 +145,7 @@ html.is-loading body { overflow: hidden; height: 100%; }
 
     <!-- Header -->
     <header class="fixed top-0 left-0 w-full z-50 px-6 py-8 mix-blend-difference flex justify-between items-center transition-transform duration-300" id="header">
-        <a href="#" class="font-['Anton',sans-serif] text-[clamp(1.25rem,2vw,1.5rem)] uppercase z-50 tracking-tight text-[#e2e1d3]">
-            Orange.Fyre
-        </a>
+        <a href="#" id="logo" aria-label="Orange.Fyre" style="line-height:1.4" class="font-['Anton',sans-serif] text-[clamp(1.25rem,2vw,1.5rem)] uppercase z-50 tracking-tight text-[#e2e1d3] inline-flex"><span class="logo-orange" aria-hidden="true"><span class="lo">O</span><span class="lo">r</span><span class="lo">a</span><span class="lo">n</span><span class="lo">g</span><span class="lo">e</span><span class="lo">.</span></span><span id="logo-spacer" aria-hidden="true" style="display:inline-block;visibility:hidden">Fyre</span></a>
 
         <button class="relative z-50 w-8 h-4 flex flex-col justify-between items-end group focus:outline-none" aria-label="Toggle Menu" id="menu-btn">
             <span id="hamburger-line-1" class="w-full h-[2px] bg-[#e2e1d3] origin-center transition-all duration-300 ease-in-out"></span>
@@ -119,6 +153,9 @@ html.is-loading body { overflow: hidden; height: 100%; }
             <span id="hamburger-line-3" class="w-full h-[2px] bg-[#e2e1d3] origin-center transition-all duration-300 ease-in-out"></span>
         </button>
     </header>
+
+    <!-- "Fyre": own layer so the header blend mode doesn't tint the flames -->
+    <a href="#" id="logo-fyre" aria-hidden="true" tabindex="-1"><span id="fyre-text">Fyre</span><canvas id="fyre-fire"></canvas></a>
 
     <!-- Fullscreen Menu Overlay -->
     <div class="fixed flex flex-col transition-opacity duration-500 ease-in-out z-40 pr-10 pl-10 top-0 right-0 bottom-0 left-0 gap-x-6 gap-y-6 justify-center opacity-0 pointer-events-none bg-[#121212]" id="menu-overlay">
@@ -166,8 +203,8 @@ html.is-loading body { overflow: hidden; height: 100%; }
 
         <!-- About / Video Intro -->
         <section class="relative w-full min-h-screen py-20 px-4 flex justify-center items-center bg-[#0d0805] overflow-hidden">
-            <div class="absolute left-0 top-0 w-[40%] h-full bg-[#ff5a00]/20 blur-[150px] pointer-events-none rounded-r-full transform -translate-x-1/2"></div>
-            <div class="absolute right-0 top-0 w-[40%] h-full bg-[#ff5a00]/20 blur-[150px] pointer-events-none rounded-l-full transform translate-x-1/2"></div>
+            <div class="glow-blob absolute left-0 top-0 w-[40%] h-full bg-[#ff5a00]/20 blur-[150px] pointer-events-none rounded-r-full transform -translate-x-1/2"></div>
+            <div class="glow-blob absolute right-0 top-0 w-[40%] h-full bg-[#ff5a00]/20 blur-[150px] pointer-events-none rounded-l-full transform translate-x-1/2"></div>
 
             <div class="relative z-10 flex flex-col items-center justify-center font-['Anton',sans-serif] uppercase text-[#ff5a00] leading-[0.85] text-[clamp(4rem,12vw,12rem)] tracking-tight text-center select-none" style="text-shadow: 0 0 40px rgba(255,90,0,0.5), 0 0 80px rgba(255,90,0,0.2)">
 
@@ -439,20 +476,31 @@ html.is-loading body { overflow: hidden; height: 100%; }
 
         gsap.registerPlugin(ScrollTrigger);
 
-        // Smooth scroll (Lenis) synced with GSAP
-        const lenis = new Lenis({
-            duration: 1.2,
-            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-            direction: 'vertical',
-            gestureDirection: 'vertical',
-            smoothTouch: false,
-            touchMultiplier: 2,
-            infinite: false,
-        });
+        // Smooth scroll (Lenis) only on mouse devices. Touch devices keep native scrolling (smoother, no JS hijack).
+        const isTouch = !window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+        ScrollTrigger.config({ ignoreMobileResize: true });
 
-        lenis.on('scroll', ScrollTrigger.update);
-        gsap.ticker.add((time) => lenis.raf(time * 1000));
-        gsap.ticker.lagSmoothing(0);
+        let lenis;
+        if (!isTouch) {
+            lenis = new Lenis({
+                duration: 1.2,
+                easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                direction: 'vertical',
+                gestureDirection: 'vertical',
+                infinite: false,
+            });
+            lenis.on('scroll', ScrollTrigger.update);
+            gsap.ticker.add((time) => lenis.raf(time * 1000));
+            gsap.ticker.lagSmoothing(0);
+        } else {
+            // Same API, native scroll underneath
+            lenis = {
+                stop() { document.body.style.overflow = 'hidden'; },
+                start() { document.body.style.overflow = ''; },
+                scrollTo(y) { window.scrollTo({ top: y, behavior: 'smooth' }); },
+                on() {}
+            };
+        }
 
         // Keep scroll locked while the preloader is on screen
         if (root.classList.contains('is-loading')) lenis.stop();
@@ -463,15 +511,22 @@ html.is-loading body { overflow: hidden; height: 100%; }
             let lastScrollY = window.scrollY;
             const header = document.getElementById('header');
 
-            lenis.on('scroll', () => {
-                const y = window.scrollY;
-                if (y > 100 && y > lastScrollY) {
-                    header.style.transform = 'translateY(-100%)';
-                } else {
-                    header.style.transform = 'translateY(0)';
-                }
-                lastScrollY = y;
-            });
+            let ticking = false;
+            window.addEventListener('scroll', () => {
+                if (ticking) return;
+                ticking = true;
+                requestAnimationFrame(() => {
+                    const y = window.scrollY;
+                    if (Math.abs(y - lastScrollY) > 4) {
+                        const hide = y > 100 && y > lastScrollY;
+                        header.style.transform = hide ? 'translateY(-100%)' : 'translateY(0)';
+                        const fy = document.getElementById('logo-fyre');
+                        if (fy) fy.style.transform = hide ? 'translateY(-' + header.offsetHeight + 'px)' : 'translateY(0)';
+                        lastScrollY = y;
+                    }
+                    ticking = false;
+                });
+            }, { passive: true });
 
             // Hero animation (starts as the preloader lifts)
             whenReady(() => {
@@ -575,10 +630,159 @@ html.is-loading body { overflow: hidden; height: 100%; }
     });
 </script>
 
-<!-- Hero water glow -->
+<!-- Logo fire -->
 <script>
-/* Orange.Fyre — living hero glow: endless ambient flow + water ripples that follow the cursor.
-   Renders the blurred "RO" glow as a texture and distorts it in a WebGL shader.
+/* Orange.Fyre logo — "Fyre" ignites after the preloader and the fire reveals the logo;
+   "Orange" emerges letter by letter through a heat haze. Hover re-ignites a small flame. */
+(function () {
+  'use strict';
+  var fy = document.getElementById('logo-fyre');
+  var sp = document.getElementById('logo-spacer');
+  var logo = document.getElementById('logo');
+  if (!fy || !sp) return;
+
+  /* "Fyre" lives in its own fixed layer (outside the header's blend mode so its colours stay true).
+     Keep it glued to the invisible spacer inside the header. */
+  function place() { fy.style.left = sp.offsetLeft + 'px'; fy.style.top = sp.offsetTop + 'px'; }
+  place();
+  window.addEventListener('resize', place);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(place);
+  window.addEventListener('load', place);
+
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce || typeof window.gsap === 'undefined') return;   // logo stays plainly visible
+
+  var txt = document.getElementById('fyre-text');
+  var cv = document.getElementById('fyre-fire');
+  var los = Array.prototype.slice.call(document.querySelectorAll('#logo .lo'));
+  var ctx = cv.getContext('2d');
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  gsap.set(txt, { opacity: 0, scaleY: 1.35, filter: 'blur(6px)', color: '#fff1b8' });
+  gsap.set(los, { opacity: 0, y: 12, filter: 'blur(6px)' });
+
+  /* ---------- Fire (particle sprites, only runs while burning) ---------- */
+  var COLORS = [[255,245,200],[255,215,110],[255,160,40],[255,100,15],[230,60,5],[170,30,0]];
+  var sprites = COLORS.map(function (c) {
+    var s = document.createElement('canvas'); s.width = s.height = 64;
+    var x = s.getContext('2d'), g = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+    g.addColorStop(0, 'rgba(' + c + ',1)'); g.addColorStop(.4, 'rgba(' + c + ',.55)'); g.addColorStop(1, 'rgba(' + c + ',0)');
+    x.fillStyle = g; x.fillRect(0, 0, 64, 64);
+    return s;
+  });
+
+  var W = 0, H = 0, textL = 0, textW = 0, baseY = 0;
+  function sizeFire() {
+    var tw = txt.offsetWidth, th = txt.offsetHeight, padX = 70, padTop = 120;
+    W = tw + padX * 2; H = th + padTop + 8;
+    cv.style.width = W + 'px'; cv.style.height = H + 'px';
+    cv.style.left = -padX + 'px'; cv.style.top = -padTop + 'px';
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    textL = padX; textW = tw; baseY = padTop + th * .62;
+  }
+
+  var P = [], S = [], env = { i: 0 }, running = false, last = 0, acc = 0, sacc = 0, additive = true;
+
+  function flame() {
+    var x = textL + Math.random() * textW;
+    P.push({ x: x, y: baseY + (Math.random() - .5) * 8, vx: (Math.random() - .5) * 10, vy: -(40 + Math.random() * 70),
+             life: .4 + Math.random() * .4, age: 0, size: 2.5 + Math.random() * 3.5, ph: Math.random() * 6.28 });
+  }
+  function spark() {
+    var ang = -Math.PI / 2 + (Math.random() - .5) * 1.9;         // mostly up, fanning out
+    var v = 90 + Math.random() * 150;
+    S.push({ x: textL + Math.random() * textW, y: baseY - Math.random() * 6,
+             vx: Math.cos(ang) * v, vy: Math.sin(ang) * v,
+             life: .5 + Math.random() * .6, age: 0, size: .9 + Math.random() * 1.3, ph: Math.random() * 6.28 });
+  }
+
+  function tick(ts) {
+    var dt = Math.min(.05, (ts - last) / 1000 || .016); last = ts;
+    acc += env.i * 520 * dt;  var n = acc | 0;  acc -= n;  for (var k = 0; k < n; k++) flame();
+    sacc += env.i * 70 * dt;  var m = sacc | 0; sacc -= m; for (var j = 0; j < m; j++) spark();
+
+    ctx.clearRect(0, 0, W, H);
+    ctx.globalCompositeOperation = additive ? 'lighter' : 'source-over';
+    var cx = textL + textW / 2;
+
+    /* flames: buoyant, turbulent, narrowing as they rise */
+    for (var i = P.length - 1; i >= 0; i--) {
+      var p = P[i]; p.age += dt;
+      if (p.age >= p.life) { P.splice(i, 1); continue; }
+      var f = p.age / p.life;
+      p.vx += (Math.sin(ts * .009 + p.ph + p.y * .12) * 55 + (cx - p.x) * 1.6) * dt;
+      p.vy -= 70 * dt;                                          // buoyancy
+      p.x += p.vx * dt; p.y += p.vy * dt;
+      var sz = p.size * (1.15 - f * .9) * 3.4;
+      ctx.globalAlpha = Math.max(0, Math.min(1, (1 - f) * 1.1)) * (additive ? .75 : .95);
+      ctx.drawImage(sprites[Math.min(5, (f * 5.4) | 0)], p.x - sz / 2, p.y - sz / 2, sz, sz);
+    }
+
+    /* sparks: fast, bright, short trails, pulled down by gravity */
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.lineCap = 'round';
+    for (var q = S.length - 1; q >= 0; q--) {
+      var s = S[q]; s.age += dt;
+      if (s.age >= s.life) { S.splice(q, 1); continue; }
+      var g = s.age / s.life;
+      var px = s.x, py = s.y;
+      s.vx += Math.sin(ts * .012 + s.ph) * 40 * dt;
+      s.vy += 170 * dt;                                         // gravity
+      s.x += s.vx * dt; s.y += s.vy * dt;
+      var flick = .55 + .45 * Math.sin(ts * .05 + s.ph);
+      var a = (1 - g) * flick;
+      ctx.globalAlpha = Math.max(0, a);
+      ctx.strokeStyle = g < .5 ? 'rgb(255,226,140)' : 'rgb(255,150,50)';
+      ctx.lineWidth = s.size;
+      ctx.beginPath(); ctx.moveTo(px - s.vx * dt * 1.6, py - s.vy * dt * 1.6); ctx.lineTo(s.x, s.y); ctx.stroke();
+      var gl = s.size * 4;
+      ctx.drawImage(sprites[1], s.x - gl / 2, s.y - gl / 2, gl, gl);
+    }
+    ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+    if (env.i > .01 || P.length || S.length) requestAnimationFrame(tick);
+    else { running = false; ctx.clearRect(0, 0, W, H); }
+  }
+
+  /* ~1s burn: quick ignition, short hold, fast decay */
+  function burn(hold, power, add) {
+    additive = add !== false;
+    sizeFire();
+    gsap.killTweensOf(env);
+    gsap.to(env, { i: power, duration: .15, ease: 'power2.out' });
+    gsap.to(env, { i: 0, duration: .5, delay: .15 + hold, ease: 'power2.in' });
+    if (!running) { running = true; last = performance.now(); requestAnimationFrame(tick); }
+  }
+
+  /* ---------- Intro: after the preloader ---------- */
+  function reveal() {
+    burn(.35, 1, true);
+    gsap.timeline()
+      .to(txt, { opacity: 1, scaleY: 1, filter: 'blur(0px)', color: '#ff5a00', duration: .85, ease: 'power2.out',
+                 onComplete: function () { gsap.set(txt, { clearProps: 'filter,transform' }); } }, .12)
+      .to(los, { opacity: 1, y: 0, filter: 'blur(0px)', duration: .65, stagger: .04, ease: 'power3.out',
+                 onComplete: function () { gsap.set(los, { clearProps: 'filter' }); } }, .3);
+  }
+  if (document.documentElement.classList.contains('is-loading')) {
+    document.addEventListener('preloader:done', function () { setTimeout(reveal, 120); }, { once: true });
+  } else { reveal(); }
+
+  /* ---------- Hover: letters wave + small flame ---------- */
+  function hover() {
+    if (env.i > .05) return;
+    burn(.15, .5, false);
+    gsap.to(los, { keyframes: [{ y: -5, duration: .15, ease: 'power2.out' }, { y: 0, duration: .25, ease: 'power2.inOut' }], stagger: .035, overwrite: 'auto' });
+  }
+  [logo, fy].forEach(function (el) { el.addEventListener('mouseenter', hover); });
+})();
+</script>
+
+<!-- Hero fire glow -->
+<script>
+/* Orange.Fyre — living hero glow, fire edition.
+   The blurred "RO" glow is rendered as a texture and driven by a flame shader:
+   rising turbulence, flickering heat, a hotter core. The cursor stokes it (flares up and
+   leans with the movement); a click throws a burst of heat. Endless ambient loop.
    Falls back to the static CSS glow if WebGL is unavailable or reduced motion is on. */
 (function () {
   'use strict';
@@ -588,6 +792,8 @@ html.is-loading body { overflow: hidden; height: 100%; }
   if (!hero || !cv) return;
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
+  var coarse = window.matchMedia('(hover: none)').matches || window.innerWidth < 900;
+  if (coarse) cv.style.mixBlendMode = 'normal';
   var gl = cv.getContext('webgl', { alpha: true, premultipliedAlpha: true, antialias: false });
   if (!gl) return;
 
@@ -602,37 +808,49 @@ html.is-loading body { overflow: hidden; height: 100%; }
     'uniform sampler2D uTex;',
     'uniform float uT;',
     'uniform float uAsp;',
-    'uniform vec4 uRip[8];',
-    'uniform vec3 uM;',
+    'uniform vec3 uM;',      // cursor (aspect space) + heat
+    'uniform vec2 uV;',      // cursor velocity (gust)
+    'uniform vec4 uF;',      // click flare: xy, age, strength
+    'float hash(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}',
+    'float noise(vec2 p){',
+    '  vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);',
+    '  return mix(mix(hash(i),hash(i+vec2(1.,0.)),f.x),mix(hash(i+vec2(0.,1.)),hash(i+vec2(1.,1.)),f.x),f.y);',
+    '}',
+    'float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*noise(p);p=p*2.03+vec2(1.7,9.2);a*=.5;}return v;}',
     'void main(){',
     '  vec2 uv=vUv;',
     '  vec2 p=vec2(uv.x*uAsp,uv.y);',
-    '  float t=uT*.35;',
-    '  uv=(uv-.5)*(1.+.025*sin(uT*.6))+.5+vec2(sin(uT*.23),cos(uT*.19))*.012;',
-    '  vec2 warp=vec2(',
-    '    sin(p.y*3.+t*1.3)+.5*sin(p.y*7.-t*1.9+p.x*2.),',
-    '    sin(p.x*3.2-t*1.1)+.5*sin(p.x*6.5+t*1.7-p.y*2.));',
-    '  vec2 disp=warp*.014;',
-    '  float h=0.;',
-    '  for(int i=0;i<8;i++){',
-    '    vec4 r=uRip[i];',
-    '    vec2 d=p-r.xy;',
-    '    float dist=length(d);',
-    '    float x=dist-r.z*.5;',
-    '    float w=sin(x*42.)*exp(-x*x*140.)*exp(-r.z*1.3)*r.w;',
-    '    disp+=d/(dist+.001)*w*.022;',
-    '    h+=w;',
-    '  }',
+    '  float t=uT;',
+    // slow breathing of the whole fire
+    '  uv=(uv-.5)*(1.+.03*sin(t*.7)+.015*sin(t*1.9))+.5;',
+    // heat grows with height so the flames lick upward
+    '  float lift=smoothstep(.0,1.,uv.y);',
+    // turbulence scrolls DOWN the noise field => the pattern rises like flames
+    '  float n1=fbm(vec2(p.x*3.2, p.y*2.4 - t*1.15));',
+    '  float n2=fbm(vec2(p.x*5.5+7., p.y*3.6 - t*1.9));',
+    '  vec2 disp=vec2((n1-.5)*.075, (n2-.5)*.045 + .012)*(.55+.9*lift);',
+    // cursor: bulge toward heat, lean with the gust
     '  vec2 dm=p-uM.xy;',
-    '  float m=exp(-dot(dm,dm)*14.)*uM.z;',
-    '  disp-=dm*m*.08;',
-    '  vec4 c=texture2D(uTex,uv+disp);',
-    '  float sp=clamp(h,-1.,1.);',
-    '  float lit=max(sp,0.)*.22;',
-    '  float dark=max(-sp,0.)*.25;',
-    '  vec4 o=c*.7*(1.-dark);',
-    '  o.rgb+=vec3(1.,.55,.25)*lit*c.a;',
-    '  o.a=min(o.a+lit*c.a*.5,1.);',
+    '  float m=exp(-dot(dm,dm)*9.)*uM.z;',
+    '  disp+=vec2(uV.x*.07, uV.y*.04+.03)*m - dm*m*.05;',
+    // click flare: a burst of heat pushing outward
+    '  vec2 df=p-uF.xy;',
+    '  float fd=length(df);',
+    '  float fl=exp(-fd*fd*7.)*exp(-uF.z*2.4)*uF.w;',
+    '  disp+=df/(fd+.001)*fl*.05;',
+    // two taps: body + a stretched, faster tongue layer
+    '  vec4 c1=texture2D(uTex,uv+disp);',
+    '  vec4 c2=texture2D(uTex,uv+disp*1.9+vec2(0.,-.035-.02*n1));',
+    '  vec4 c=max(c1,c2*.85);',
+    // flicker: slow swell + quick shimmer
+    '  float flick=.82+.28*noise(vec2(p.x*2.2,t*1.4))+.06*sin(t*13.+p.x*6.);',
+    '  float heat=flick+m*.55+fl*.9;',
+    // hotter core: shift toward yellow-white where the glow is dense
+    '  float core=smoothstep(.35,.9,c.a)*(.35+.35*n2)*(1.+m*.6+fl);',
+    '  vec3 hot=vec3(1.,.72,.25);',
+    '  vec4 o=c*.7*heat;',
+    '  o.rgb=mix(o.rgb,hot*o.a,clamp(core,0.,1.)*.55);',
+    '  o.a=min(o.a,1.);',
     '  gl_FragColor=o;',
     '}'
   ].join('\n');
@@ -658,8 +876,9 @@ html.is-loading body { overflow: hidden; height: 100%; }
 
   var uT = gl.getUniformLocation(prog, 'uT');
   var uAsp = gl.getUniformLocation(prog, 'uAsp');
-  var uRip = gl.getUniformLocation(prog, 'uRip');
   var uM = gl.getUniformLocation(prog, 'uM');
+  var uV = gl.getUniformLocation(prog, 'uV');
+  var uF = gl.getUniformLocation(prog, 'uF');
   gl.uniform1i(gl.getUniformLocation(prog, 'uTex'), 0);
 
   var tex = gl.createTexture();
@@ -678,7 +897,7 @@ html.is-loading body { overflow: hidden; height: 100%; }
     x.fillStyle = '#ff4d00';
     x.shadowColor = '#ff4d00';
     x.shadowBlur = blur * 2;
-    x.shadowOffsetX = 20000;                 // draw the glyphs off-canvas, keep only their blurred shadow
+    x.shadowOffsetX = 20000;                 // glyphs drawn off-canvas, only their blurred shadow stays
     x.fillText('RO', tw / 2 - 20000, th / 2 + fsz * 0.04);
 
     gl.activeTexture(gl.TEXTURE0);
@@ -694,17 +913,16 @@ html.is-loading body { overflow: hidden; height: 100%; }
   }
 
   function resize() {
-    var q = 0.6 * Math.min(window.devicePixelRatio || 1, 1.5);
+    var q = coarse ? 0.3 : 0.6 * Math.min(window.devicePixelRatio || 1, 1.5);
     cv.width = Math.max(2, Math.round(hero.clientWidth * q));
     cv.height = Math.max(2, Math.round(hero.clientHeight * q));
     gl.viewport(0, 0, cv.width, cv.height);
     gl.uniform1f(uAsp, cv.width / cv.height);
   }
 
-  /* Ripples + cursor */
-  var rip = [], ri = 0, ripArr = new Float32Array(32);
-  for (var i = 0; i < 8; i++) rip.push({ x: 0, y: 0, t: -99, s: 0 });
-  var mouse = { x: .5, y: .5, tx: .5, ty: .5, a: 0 }, last = { x: -9, y: -9, t: 0 };
+  /* Cursor stoking the fire */
+  var mouse = { x: .5, y: .5, tx: .5, ty: .5, heat: 0, vx: 0, vy: 0, px: null, py: null, pt: 0 };
+  var flare = { x: 0, y: 0, t: -99, s: 0 };
 
   function toLocal(e) {
     var r = cv.getBoundingClientRect(), asp = r.width / r.height;
@@ -712,37 +930,40 @@ html.is-loading body { overflow: hidden; height: 100%; }
     if (nx < 0 || nx > 1 || ny < 0 || ny > 1) return null;
     return { x: nx * asp, y: ny };
   }
-  function spawn(p, s, now) { rip[ri] = { x: p.x, y: p.y, t: now, s: s }; ri = (ri + 1) % 8; }
-
   window.addEventListener('pointermove', function (e) {
     var p = toLocal(e); if (!p) return;
     var now = performance.now() / 1000;
-    mouse.tx = p.x; mouse.ty = p.y; mouse.a = 1;
-    var d = Math.hypot(p.x - last.x, p.y - last.y);
-    if (d > .05 && now - last.t > .06) {
-      spawn(p, Math.min(1, .45 + d * 5), now);
-      last.x = p.x; last.y = p.y; last.t = now;
+    if (mouse.px !== null && now > mouse.pt) {
+      var dt = now - mouse.pt;
+      mouse.vx = Math.max(-1, Math.min(1, mouse.vx * .6 + ((p.x - mouse.px) / dt) * .12));
+      mouse.vy = Math.max(-1, Math.min(1, mouse.vy * .6 + ((p.y - mouse.py) / dt) * .12));
     }
+    mouse.px = p.x; mouse.py = p.y; mouse.pt = now;
+    mouse.tx = p.x; mouse.ty = p.y; mouse.heat = 1;
   }, { passive: true });
   window.addEventListener('pointerdown', function (e) {
-    var p = toLocal(e); if (p) spawn(p, 1.2, performance.now() / 1000);
+    var p = toLocal(e); if (!p) return;
+    flare.x = p.x; flare.y = p.y; flare.t = performance.now() / 1000; flare.s = 1;
+    mouse.tx = p.x; mouse.ty = p.y; mouse.heat = 1;
   }, { passive: true });
 
   /* Render loop (paused when the hero is off-screen or the tab is hidden) */
-  var visible = true, running = false, t0 = performance.now();
+  var visible = true, running = false, t0 = performance.now(), lastDraw = 0, scrolling = false, st;
+  window.addEventListener('scroll', function () {
+    scrolling = true; clearTimeout(st); st = setTimeout(function () { scrolling = false; }, 140);
+  }, { passive: true });
   function frame() {
     if (!visible || document.hidden) { running = false; return; }
     requestAnimationFrame(frame);
     var now = performance.now() / 1000;
-    mouse.x += (mouse.tx - mouse.x) * .12; mouse.y += (mouse.ty - mouse.y) * .12;
-    mouse.a *= .985;
-    for (var i = 0; i < 8; i++) {
-      var r = rip[i], age = now - r.t, o = i * 4;
-      ripArr[o] = r.x; ripArr[o + 1] = r.y; ripArr[o + 2] = age; ripArr[o + 3] = age < 3.4 ? r.s : 0;
-    }
+    if (coarse && (scrolling || now - lastDraw < 1 / 30)) return;   // touch: keep scrolling free, cap at 30fps
+    lastDraw = now;
+    mouse.x += (mouse.tx - mouse.x) * .14; mouse.y += (mouse.ty - mouse.y) * .14;
+    mouse.heat *= .975; mouse.vx *= .93; mouse.vy *= .93;
     gl.uniform1f(uT, (performance.now() - t0) / 1000);
-    gl.uniform4fv(uRip, ripArr);
-    gl.uniform3f(uM, mouse.x, mouse.y, mouse.a);
+    gl.uniform3f(uM, mouse.x, mouse.y, mouse.heat);
+    gl.uniform2f(uV, mouse.vx, mouse.vy);
+    gl.uniform4f(uF, flare.x, flare.y, now - flare.t, now - flare.t < 3 ? flare.s : 0);
     gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   }
@@ -753,17 +974,19 @@ html.is-loading body { overflow: hidden; height: 100%; }
   }
   document.addEventListener('visibilitychange', run);
 
-  var rt;
+  var rt, lastW = window.innerWidth;
   window.addEventListener('resize', function () {
+    if (window.innerWidth === lastW) return;       // mobile address bar show/hide: ignore
+    lastW = window.innerWidth;
     clearTimeout(rt);
-    rt = setTimeout(function () { resize(); buildTexture(); }, 200);
+    rt = setTimeout(function () { resize(); buildTexture(); }, 250);
   });
 
   var fontReady = (document.fonts && document.fonts.load) ? document.fonts.load('200px Anton', 'RO') : Promise.resolve();
   Promise.race([fontReady, new Promise(function (r) { setTimeout(r, 1500); })]).then(function () {
     resize(); buildTexture(); run();
     cv.style.opacity = '1';
-    if (cssGlow) cssGlow.style.opacity = '0';   // swap the static glow for the live one
+    if (cssGlow) cssGlow.style.display = 'none';   // swap the static glow for the live one
   });
 })();
 </script>
