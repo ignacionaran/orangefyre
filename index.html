@@ -17,7 +17,63 @@
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap" rel="stylesheet">
 
 <!-- Preloader CSS -->
-<link rel="stylesheet" href="of-preloader.css">
+<style>
+/* Orange.Fyre — Naran preloader */
+html.is-loading,
+html.is-loading body { overflow: hidden; height: 100%; }
+
+#of-preloader {
+  position: fixed; inset: 0; z-index: 9999;
+  background: #0b0b0b; color: #f1f1ee;
+  display: flex; align-items: center; justify-content: center;
+  will-change: transform;
+  box-shadow: 0 1px 0 0 #ff6b35, 0 14px 70px rgba(255,107,53,.38);
+}
+.pl-logo {
+  display: flex; align-items: center;
+  font-family: Inter, Arial, sans-serif; font-weight: 800;
+  font-size: clamp(40px, 6vw, 96px);
+  visibility: hidden;
+}
+
+/* The dot is the loader: it fills with orange from left to right,
+   a bright scan line marks the leading edge */
+.pl-dot {
+  position: relative;
+  flex: none; width: 1.4em; height: 1.4em; border-radius: 50%;
+  --p: 0;
+  background:
+    linear-gradient(90deg,
+      transparent calc(var(--p) * 100% - 7px),
+      rgba(255,255,255,.6) calc(var(--p) * 100% - .5px),
+      transparent calc(var(--p) * 100% + 1px)),
+    linear-gradient(90deg,
+      #ff6b35 calc(var(--p) * 100% - .5px),
+      rgba(255,107,53,.14) calc(var(--p) * 100% + .5px));
+  box-shadow: 0 0 0 1px rgba(255,107,53,.28), 0 0 .9em rgba(255,107,53,.22);
+}
+/* Orbit rings (decorative) */
+.pl-dot::before, .pl-dot::after {
+  content: ""; position: absolute; border-radius: 50%; pointer-events: none;
+  opacity: 0; transition: opacity .5s ease;
+}
+.pl-dot::before {
+  inset: -.26em; border: 1px dashed rgba(241,241,238,.32);
+  animation: pl-spin 7s linear infinite;
+}
+.pl-dot::after {
+  inset: -.26em; border: 1px solid transparent; border-top-color: #ff6b35; border-right-color: rgba(255,107,53,.4);
+  animation: pl-spin 1.4s cubic-bezier(.5,.1,.4,.9) infinite;
+}
+.pl-logo.is-on .pl-dot::before, .pl-logo.is-on .pl-dot::after { opacity: 1; }
+@keyframes pl-spin { to { transform: rotate(360deg); } }
+
+.pl-word {
+  flex: none; display: block; overflow: hidden; white-space: nowrap;
+  margin-left: .3em; padding: .1em .06em .1em 0;
+}
+.pl-word-inner { display: block; line-height: 1; letter-spacing: -.055em; }
+</style>
 
 <!-- Tailwind CSS -->
 <script src="https://cdn.tailwindcss.com"></script>
@@ -27,8 +83,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.19/bundled/lenis.min.js"></script>
-<!-- Three.js (preloader 3D scene) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
 <style>
   html, body { background: #121212; margin: 0; }
@@ -45,29 +99,9 @@
 
 <!-- ============ PRELOADER ============ -->
 <div id="of-preloader" aria-hidden="true">
-  <canvas id="of-pl-canvas"></canvas>
-  <div class="of-pl-grid"></div>
-  <div class="of-pl-vignette"></div>
-  <div class="of-pl-scan"></div>
-
-  <div class="of-pl-ui">
-    <span class="of-pl-corner tl"></span><span class="of-pl-corner tr"></span>
-    <span class="of-pl-corner bl"></span><span class="of-pl-corner br"></span>
-
-    <div class="of-pl-top">
-      <span class="of-pl-brand">Orange.Fyre</span>
-      <span>Madrid, ES</span>
-    </div>
-
-    <div class="of-pl-word">
-      <span class="of-pl-char"></span><span class="of-pl-char"></span><span class="of-pl-char"></span><span class="of-pl-char"></span><span class="of-pl-char"></span>
-    </div>
-
-    <div class="of-pl-bottom">
-      <div class="of-pl-count"><span class="of-pl-count-num">000</span><small>%</small></div>
-      <div class="of-pl-bar"><span class="of-pl-bar-fill"></span></div>
-      <div class="of-pl-status">Initializing</div>
-    </div>
+  <div class="pl-logo">
+    <span class="pl-dot"></span>
+    <span class="pl-word"><span class="pl-word-inner">Naran</span></span>
   </div>
 </div>
 
@@ -107,6 +141,7 @@
     <main>
         <!-- Hero Section -->
         <section class="min-h-screen flex justify-center overflow-hidden w-full pt-0 pb-0 relative items-center" id="hero">
+            <canvas id="hero-water" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;mix-blend-mode:screen;opacity:0;transition:opacity 1.2s ease"></canvas>
             <div class="text-center w-full max-w-[94vw] mx-auto relative flex flex-col items-center justify-center">
                 <div class="absolute inset-0 flex justify-center items-center pointer-events-none z-0">
                     <div class="text-[clamp(10rem,40vw,50rem)] font-['Anton',sans-serif] leading-none text-[#ff4d00] blur-[40px] md:blur-[60px] opacity-70 select-none mix-blend-screen" id="hero-glow">
@@ -540,8 +575,286 @@
     });
 </script>
 
+<!-- Hero water glow -->
+<script>
+/* Orange.Fyre — living hero glow: endless ambient flow + water ripples that follow the cursor.
+   Renders the blurred "RO" glow as a texture and distorts it in a WebGL shader.
+   Falls back to the static CSS glow if WebGL is unavailable or reduced motion is on. */
+(function () {
+  'use strict';
+  var hero = document.getElementById('hero');
+  var cv = document.getElementById('hero-water');
+  var cssGlow = document.getElementById('hero-glow');
+  if (!hero || !cv) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  var gl = cv.getContext('webgl', { alpha: true, premultipliedAlpha: true, antialias: false });
+  if (!gl) return;
+
+  var VS = 'attribute vec2 a;varying vec2 vUv;void main(){vUv=a*.5+.5;gl_Position=vec4(a,0.,1.);}';
+  var FS = [
+    '#ifdef GL_FRAGMENT_PRECISION_HIGH',
+    'precision highp float;',
+    '#else',
+    'precision mediump float;',
+    '#endif',
+    'varying vec2 vUv;',
+    'uniform sampler2D uTex;',
+    'uniform float uT;',
+    'uniform float uAsp;',
+    'uniform vec4 uRip[8];',
+    'uniform vec3 uM;',
+    'void main(){',
+    '  vec2 uv=vUv;',
+    '  vec2 p=vec2(uv.x*uAsp,uv.y);',
+    '  float t=uT*.35;',
+    '  uv=(uv-.5)*(1.+.025*sin(uT*.6))+.5+vec2(sin(uT*.23),cos(uT*.19))*.012;',
+    '  vec2 warp=vec2(',
+    '    sin(p.y*3.+t*1.3)+.5*sin(p.y*7.-t*1.9+p.x*2.),',
+    '    sin(p.x*3.2-t*1.1)+.5*sin(p.x*6.5+t*1.7-p.y*2.));',
+    '  vec2 disp=warp*.014;',
+    '  float h=0.;',
+    '  for(int i=0;i<8;i++){',
+    '    vec4 r=uRip[i];',
+    '    vec2 d=p-r.xy;',
+    '    float dist=length(d);',
+    '    float x=dist-r.z*.5;',
+    '    float w=sin(x*42.)*exp(-x*x*140.)*exp(-r.z*1.3)*r.w;',
+    '    disp+=d/(dist+.001)*w*.022;',
+    '    h+=w;',
+    '  }',
+    '  vec2 dm=p-uM.xy;',
+    '  float m=exp(-dot(dm,dm)*14.)*uM.z;',
+    '  disp-=dm*m*.08;',
+    '  vec4 c=texture2D(uTex,uv+disp);',
+    '  float sp=clamp(h,-1.,1.);',
+    '  float lit=max(sp,0.)*.22;',
+    '  float dark=max(-sp,0.)*.25;',
+    '  vec4 o=c*.7*(1.-dark);',
+    '  o.rgb+=vec3(1.,.55,.25)*lit*c.a;',
+    '  o.a=min(o.a+lit*c.a*.5,1.);',
+    '  gl_FragColor=o;',
+    '}'
+  ].join('\n');
+
+  function compile(type, src) {
+    var s = gl.createShader(type);
+    gl.shaderSource(s, src); gl.compileShader(s);
+    return gl.getShaderParameter(s, gl.COMPILE_STATUS) ? s : null;
+  }
+  var vs = compile(gl.VERTEX_SHADER, VS), fs = compile(gl.FRAGMENT_SHADER, FS);
+  if (!vs || !fs) return;
+  var prog = gl.createProgram();
+  gl.attachShader(prog, vs); gl.attachShader(prog, fs); gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
+  gl.useProgram(prog);
+
+  var buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  var loc = gl.getAttribLocation(prog, 'a');
+  gl.enableVertexAttribArray(loc);
+  gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+
+  var uT = gl.getUniformLocation(prog, 'uT');
+  var uAsp = gl.getUniformLocation(prog, 'uAsp');
+  var uRip = gl.getUniformLocation(prog, 'uRip');
+  var uM = gl.getUniformLocation(prog, 'uM');
+  gl.uniform1i(gl.getUniformLocation(prog, 'uTex'), 0);
+
+  var tex = gl.createTexture();
+  var ready = false;
+
+  /* The glow itself: "RO" in Anton, heavily blurred (same look as the original CSS glow) */
+  function buildTexture() {
+    var vw = hero.clientWidth || window.innerWidth, vh = hero.clientHeight || window.innerHeight;
+    var tw = 1024, th = Math.max(2, Math.round(tw * vh / vw)), k = tw / vw;
+    var c = document.createElement('canvas'); c.width = tw; c.height = th;
+    var x = c.getContext('2d');
+    var fsz = Math.min(Math.max(window.innerWidth * 0.4, 160), 800) * k;
+    var blur = (window.innerWidth >= 768 ? 60 : 40) * k;
+    x.font = fsz + 'px Anton, Impact, sans-serif';
+    x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.fillStyle = '#ff4d00';
+    x.shadowColor = '#ff4d00';
+    x.shadowBlur = blur * 2;
+    x.shadowOffsetX = 20000;                 // draw the glyphs off-canvas, keep only their blurred shadow
+    x.fillText('RO', tw / 2 - 20000, th / 2 + fsz * 0.04);
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, c);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    ready = true;
+  }
+
+  function resize() {
+    var q = 0.6 * Math.min(window.devicePixelRatio || 1, 1.5);
+    cv.width = Math.max(2, Math.round(hero.clientWidth * q));
+    cv.height = Math.max(2, Math.round(hero.clientHeight * q));
+    gl.viewport(0, 0, cv.width, cv.height);
+    gl.uniform1f(uAsp, cv.width / cv.height);
+  }
+
+  /* Ripples + cursor */
+  var rip = [], ri = 0, ripArr = new Float32Array(32);
+  for (var i = 0; i < 8; i++) rip.push({ x: 0, y: 0, t: -99, s: 0 });
+  var mouse = { x: .5, y: .5, tx: .5, ty: .5, a: 0 }, last = { x: -9, y: -9, t: 0 };
+
+  function toLocal(e) {
+    var r = cv.getBoundingClientRect(), asp = r.width / r.height;
+    var nx = (e.clientX - r.left) / r.width, ny = 1 - (e.clientY - r.top) / r.height;
+    if (nx < 0 || nx > 1 || ny < 0 || ny > 1) return null;
+    return { x: nx * asp, y: ny };
+  }
+  function spawn(p, s, now) { rip[ri] = { x: p.x, y: p.y, t: now, s: s }; ri = (ri + 1) % 8; }
+
+  window.addEventListener('pointermove', function (e) {
+    var p = toLocal(e); if (!p) return;
+    var now = performance.now() / 1000;
+    mouse.tx = p.x; mouse.ty = p.y; mouse.a = 1;
+    var d = Math.hypot(p.x - last.x, p.y - last.y);
+    if (d > .05 && now - last.t > .06) {
+      spawn(p, Math.min(1, .45 + d * 5), now);
+      last.x = p.x; last.y = p.y; last.t = now;
+    }
+  }, { passive: true });
+  window.addEventListener('pointerdown', function (e) {
+    var p = toLocal(e); if (p) spawn(p, 1.2, performance.now() / 1000);
+  }, { passive: true });
+
+  /* Render loop (paused when the hero is off-screen or the tab is hidden) */
+  var visible = true, running = false, t0 = performance.now();
+  function frame() {
+    if (!visible || document.hidden) { running = false; return; }
+    requestAnimationFrame(frame);
+    var now = performance.now() / 1000;
+    mouse.x += (mouse.tx - mouse.x) * .12; mouse.y += (mouse.ty - mouse.y) * .12;
+    mouse.a *= .985;
+    for (var i = 0; i < 8; i++) {
+      var r = rip[i], age = now - r.t, o = i * 4;
+      ripArr[o] = r.x; ripArr[o + 1] = r.y; ripArr[o + 2] = age; ripArr[o + 3] = age < 3.4 ? r.s : 0;
+    }
+    gl.uniform1f(uT, (performance.now() - t0) / 1000);
+    gl.uniform4fv(uRip, ripArr);
+    gl.uniform3f(uM, mouse.x, mouse.y, mouse.a);
+    gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  }
+  function run() { if (!running && ready) { running = true; requestAnimationFrame(frame); } }
+
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (en) { visible = en[0].isIntersecting; if (visible) run(); }).observe(hero);
+  }
+  document.addEventListener('visibilitychange', run);
+
+  var rt;
+  window.addEventListener('resize', function () {
+    clearTimeout(rt);
+    rt = setTimeout(function () { resize(); buildTexture(); }, 200);
+  });
+
+  var fontReady = (document.fonts && document.fonts.load) ? document.fonts.load('200px Anton', 'RO') : Promise.resolve();
+  Promise.race([fontReady, new Promise(function (r) { setTimeout(r, 1500); })]).then(function () {
+    resize(); buildTexture(); run();
+    cv.style.opacity = '1';
+    if (cssGlow) cssGlow.style.opacity = '0';   // swap the static glow for the live one
+  });
+})();
+</script>
+
 <!-- Preloader (keep last) -->
-<script src="of-preloader.js"></script>
+<script>
+/* Orange.Fyre — Naran preloader (~2s).
+   The orange dot fills left to right as the page loads, "Naran" decodes in beside it,
+   then the logo lifts away and a curved curtain with an orange edge reveals the hero. Needs gsap. */
+(function () {
+  'use strict';
+  var pre = document.getElementById('of-preloader');
+  var html = document.documentElement;
+  if (!pre) { html.classList.remove('is-loading'); return; }
+
+  function announce() { html.classList.remove('is-loading'); document.dispatchEvent(new Event('preloader:done')); }
+  function end() { if (pre.parentNode) pre.remove(); html.classList.remove('is-loading'); }
+
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (typeof window.gsap === 'undefined' || reduce) { end(); announce(); return; }
+
+  var logo = pre.querySelector('.pl-logo');
+  var dot = pre.querySelector('.pl-dot');
+  var inner = pre.querySelector('.pl-word-inner');
+  var WORD = inner.textContent;
+  var GLYPHS = 'NARXZKMVBW0123456789#/+';
+  var loaded = document.readyState === 'complete';
+  var finishing = false;
+  window.addEventListener('load', function () { loaded = true; });
+
+  gsap.set(dot, { '--p': 0 });
+
+  /* Letter-by-letter decode */
+  function decode() {
+    var o = { t: 0 }, tick = 0;
+    gsap.to(o, {
+      t: 1, duration: .6, ease: 'none',
+      onUpdate: function () {
+        if ((tick++ % 3) && o.t < 1) return;
+        var locked = Math.floor(o.t * (WORD.length + 1)), s = '';
+        for (var i = 0; i < WORD.length; i++) {
+          s += i < locked ? WORD[i] : GLYPHS[(Math.random() * GLYPHS.length) | 0];
+        }
+        inner.textContent = s;
+      },
+      onComplete: function () { inner.textContent = WORD; }
+    });
+  }
+
+  function finish() {
+    if (finishing) return;
+    finishing = true;
+    logo.classList.remove('is-on');
+    gsap.timeline()
+      .to(dot, { '--p': 1, duration: .2, ease: 'power2.out' })
+      .to(logo, { y: -22, opacity: 0, scale: 1.03, filter: 'blur(5px)', duration: .28, ease: 'power3.in' }, '+=.04')
+      .fromTo(pre,
+        { yPercent: 0, borderBottomLeftRadius: '50% 0vh', borderBottomRightRadius: '50% 0vh' },
+        { yPercent: -100, borderBottomLeftRadius: '50% 14vh', borderBottomRightRadius: '50% 14vh', duration: .75, ease: 'power4.inOut' },
+        '-=.1')
+      .add(announce, '-=.38')
+      .add(end);
+  }
+
+  function start() {
+    gsap.set(logo, { autoAlpha: 1 });
+    logo.classList.add('is-on');
+    gsap.timeline({
+      onComplete: function () {
+        if (loaded) finish(); else window.addEventListener('load', finish, { once: true });
+      }
+    })
+      .from(dot, { scale: 0, duration: .5, ease: 'expo.out' }, 0)
+      .from('.pl-word', { width: 0, marginLeft: 0, duration: .6, ease: 'power4.inOut' }, .15)
+      .fromTo(inner, { yPercent: 110 }, { yPercent: 0, duration: .55, ease: 'power4.out' }, .25)
+      .add(decode, .3)
+      .to(dot, { '--p': .9, duration: .8, ease: 'power2.inOut' }, .15);
+  }
+
+  // Start once fonts are ready (max 1s) so the wordmark never flashes in a fallback font
+  var fonts = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+  Promise.race([fonts, new Promise(function (r) { setTimeout(r, 1000); })]).then(start);
+
+  // Safety net: never trap the visitor behind the preloader
+  setTimeout(function () { if (!finishing) { loaded = true; finish(); } }, 10000);
+})();
+</script>
+<script>
+/* Failsafe: never leave the visitor stuck behind the preloader */
+setTimeout(function(){var p=document.getElementById("of-preloader");if(p)p.remove();document.documentElement.classList.remove("is-loading");document.dispatchEvent(new Event("preloader:done"));},12000);
+</script>
 
 </body>
 </html>
