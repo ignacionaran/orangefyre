@@ -1,0 +1,30 @@
+.preloader{
+  display:none;position:fixed;inset:0;z-index:1000;
+  background:#0b0b0b;color:#f1f1ee;
+  align-items:center;justify-content:center;
+}
+.pl-logo{
+  display:flex;align-items:center;
+  font-family:Inter,Arial,sans-serif;font-weight:800;
+  font-size:clamp(40px,6vw,96px);
+}
+.pl-dot{
+  flex:none;width:1.4em;height:1.4em;border-radius:50%;
+  background:#ff6b35;
+}
+.pl-word{
+  flex:none;display:block;overflow:hidden;white-space:nowrap;
+  margin-left:.17em;padding:.1em .06em .1em 0;
+}
+.pl-word-inner{
+  display:block;line-height:1;letter-spacing:-.055em;
+}
+.pl-bar{
+  position:absolute;left:50%;bottom:18%;
+  width:min(260px,50vw);height:2px;transform:translateX(-50%);
+  background:rgba(255,255,255,.12);overflow:hidden;
+}
+.pl-bar-fill{
+  display:block;width:100%;height:100%;
+  background:#ff6b35;transform-origin:left center;transform:scaleX(0);
+}
