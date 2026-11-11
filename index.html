@@ -2,14 +2,22 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#070605">
 <title>Orange.Fyre</title>
+
+<!-- Preloader state flag (must run first to avoid a flash of the page) -->
+<script>document.documentElement.classList.add('is-loading');</script>
+<noscript><style>#of-preloader{display:none!important}html.is-loading,html.is-loading body{overflow:auto!important;height:auto!important}</style></noscript>
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap" rel="stylesheet">
+
+<!-- Preloader CSS -->
+<link rel="stylesheet" href="of-preloader.css">
 
 <!-- Tailwind CSS -->
 <script src="https://cdn.tailwindcss.com"></script>
@@ -19,6 +27,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.19/bundled/lenis.min.js"></script>
+<!-- Three.js (preloader 3D scene) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
 <style>
   html, body { background: #121212; margin: 0; }
@@ -32,6 +42,34 @@
 </style>
 </head>
 <body>
+
+<!-- ============ PRELOADER ============ -->
+<div id="of-preloader" aria-hidden="true">
+  <canvas id="of-pl-canvas"></canvas>
+  <div class="of-pl-grid"></div>
+  <div class="of-pl-vignette"></div>
+  <div class="of-pl-scan"></div>
+
+  <div class="of-pl-ui">
+    <span class="of-pl-corner tl"></span><span class="of-pl-corner tr"></span>
+    <span class="of-pl-corner bl"></span><span class="of-pl-corner br"></span>
+
+    <div class="of-pl-top">
+      <span class="of-pl-brand">Orange.Fyre</span>
+      <span>Madrid, ES</span>
+    </div>
+
+    <div class="of-pl-word">
+      <span class="of-pl-char"></span><span class="of-pl-char"></span><span class="of-pl-char"></span><span class="of-pl-char"></span><span class="of-pl-char"></span>
+    </div>
+
+    <div class="of-pl-bottom">
+      <div class="of-pl-count"><span class="of-pl-count-num">000</span><small>%</small></div>
+      <div class="of-pl-bar"><span class="of-pl-bar-fill"></span></div>
+      <div class="of-pl-status">Initializing</div>
+    </div>
+  </div>
+</div>
 
 <div id="studio-wrapper" class="text-[#e2e1d3] antialiased overflow-x-hidden selection:bg-[#e2e1d3] selection:text-[#121212] font-['Inter',sans-serif] bg-[#121212]">
 
@@ -121,7 +159,7 @@
                 <div class="relative whitespace-nowrap mt-2">
                     Identities
                     <span class="text-[clamp(1.5rem,4vw,3.5rem)] z-20 whitespace-nowrap font-medium text-white tracking-tight absolute top-[-10%] left-[90%] -rotate-6 font-['Caveat',cursive]" style="filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6)); text-shadow: none">
-                        Wild & Free 
+                        Wild &amp; Free 
                     </span>
                 </div>
 
@@ -157,7 +195,6 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
 
-                <!-- Project 1 -->
                 <div class="relative aspect-square w-full overflow-hidden group cursor-pointer bg-[#0a0a0a]">
                     <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/917d6f93-fb36-439a-8c48-884b67b35381_1600w.jpg" alt="Matera Project" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
                     <div class="absolute inset-0 bg-[#121212]/80 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-center items-center text-center p-6 backdrop-blur-sm">
@@ -170,7 +207,6 @@
                     </div>
                 </div>
 
-                <!-- Project 2 -->
                 <div class="relative aspect-square w-full overflow-hidden group cursor-pointer bg-[#0a0a0a]">
                     <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/4734259a-bad7-422f-981e-ce01e79184f2_1600w.jpg" alt="Chance Project" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
                     <div class="absolute inset-0 bg-[#121212]/80 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-center items-center text-center p-6 backdrop-blur-sm">
@@ -183,7 +219,6 @@
                     </div>
                 </div>
 
-                <!-- Project 3 -->
                 <div class="relative aspect-square w-full overflow-hidden group cursor-pointer bg-[#0a0a0a]">
                     <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/c543a9e1-f226-4ced-80b0-feb8445a75b9_1600w.jpg" alt="Silvr Project" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
                     <div class="absolute inset-0 bg-[#121212]/80 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-center items-center text-center p-6 backdrop-blur-sm">
@@ -196,7 +231,6 @@
                     </div>
                 </div>
 
-                <!-- Project 4 -->
                 <div class="relative aspect-square w-full overflow-hidden group cursor-pointer bg-[#0a0a0a]">
                     <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/5bab247f-35d9-400d-a82b-fd87cfe913d2_1600w.webp" alt="Intramuros Project" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
                     <div class="absolute inset-0 bg-[#121212]/80 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-center items-center text-center p-6 backdrop-blur-sm">
@@ -239,7 +273,7 @@
 
                 <li class="group/item relative w-full text-center flex items-center justify-center py-2 md:py-1">
                     <span class="font-['Anton',sans-serif] text-[clamp(2.5rem,8vw,8rem)] leading-[0.85] uppercase tracking-tighter text-[#111111] md:text-[#c4c4c4] transition-all duration-500 ease-out md:group-hover/list:opacity-20 md:group-hover/item:!opacity-100 md:group-hover/item:!text-[#111111] cursor-pointer inline-block z-20 relative will-change-auto">
-                        FUNNEL & JOURNEY
+                        FUNNEL &amp; JOURNEY
                     </span>
                     <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/c543a9e1-f226-4ced-80b0-feb8445a75b9_1600w.jpg" alt="UI/UX Design" class="hidden md:block absolute left-4 top-1/2 -translate-y-1/2 w-[20vw] max-w-[350px] aspect-[16/10] object-cover rounded-2xl opacity-0 md:group-hover/item:opacity-100 transition-all duration-500 ease-out pointer-events-none z-10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] scale-95 md:group-hover/item:scale-100 will-change-transform">
                 </li>
@@ -248,7 +282,7 @@
                     <span class="font-['Anton',sans-serif] text-[clamp(2.5rem,8vw,8rem)] leading-[0.85] uppercase tracking-tighter text-[#111111] md:text-[#c4c4c4] transition-all duration-500 ease-out md:group-hover/list:opacity-20 md:group-hover/item:!opacity-100 md:group-hover/item:!text-[#111111] cursor-pointer inline-block z-20 relative will-change-auto">
                         AI DATA AUTOMATIONS
                     </span>
-                    <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=800&auto=format&fit=crop" alt="GSAP Animations" class="hidden md:block absolute left-4 top-1/2 -translate-y-1/2 w-[20vw] max-w-[350px] aspect-[16/10] object-cover rounded-2xl opacity-0 md:group-hover/item:opacity-100 transition-all duration-500 ease-out pointer-events-none z-10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] scale-95 md:group-hover/item:scale-100 will-change-transform">
+                    <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=800&auto=format&fit=crop" alt="AI Data Automations" class="hidden md:block absolute left-4 top-1/2 -translate-y-1/2 w-[20vw] max-w-[350px] aspect-[16/10] object-cover rounded-2xl opacity-0 md:group-hover/item:opacity-100 transition-all duration-500 ease-out pointer-events-none z-10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] scale-95 md:group-hover/item:scale-100 will-change-transform">
                 </li>
 
                 <li class="group/item relative w-full text-center flex items-center justify-center py-2 md:py-1">
@@ -293,7 +327,7 @@
                 <h4 class="font-medium text-xs tracking-widest text-[#e2e1d3]/50 mb-6 uppercase">
                     New Business
                 </h4>
-                <a href="mailto:hello@412.digital" class="text-xl md:text-[clamp(1.5rem,2vw,2rem)] relative inline-block after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-[1px] after:bottom-0 after:left-0 after:bg-current after:origin-bottom-right after:transition-transform after:duration-[400ms] after:ease-[cubic-bezier(0.86,0,0.07,1)] hover:after:scale-x-100 hover:after:origin-bottom-left text-[#e2e1d3]">
+                <a href="mailto:hello@orange.fyre" class="text-xl md:text-[clamp(1.5rem,2vw,2rem)] relative inline-block after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-[1px] after:bottom-0 after:left-0 after:bg-current after:origin-bottom-right after:transition-transform after:duration-[400ms] after:ease-[cubic-bezier(0.86,0,0.07,1)] hover:after:scale-x-100 hover:after:origin-bottom-left text-[#e2e1d3]">
                     hello@orange.fyre
                 </a>
             </div>
@@ -353,6 +387,13 @@
 <script>
     window.addEventListener('load', () => {
         const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const root = document.documentElement;
+
+        // Runs once the preloader has finished (or immediately if there is none)
+        const whenReady = (fn) => {
+            if (!root.classList.contains('is-loading')) { fn(); return; }
+            document.addEventListener('preloader:done', fn, { once: true });
+        };
 
         // Fallback: if GSAP or Lenis failed to load, show everything and use native scroll
         if (typeof gsap === 'undefined' || typeof Lenis === 'undefined') {
@@ -378,6 +419,10 @@
         gsap.ticker.add((time) => lenis.raf(time * 1000));
         gsap.ticker.lagSmoothing(0);
 
+        // Keep scroll locked while the preloader is on screen
+        if (root.classList.contains('is-loading')) lenis.stop();
+        whenReady(() => { lenis.start(); ScrollTrigger.refresh(); });
+
         if (!reduceMotion) {
             // Header hide/show on scroll
             let lastScrollY = window.scrollY;
@@ -393,13 +438,15 @@
                 lastScrollY = y;
             });
 
-            // Hero animation
-            gsap.to('.title-word', {
-                y: 0,
-                duration: 1,
-                stagger: 0.1,
-                ease: 'power4.out',
-                delay: 0.2
+            // Hero animation (starts as the preloader lifts)
+            whenReady(() => {
+                gsap.to('.title-word', {
+                    y: 0,
+                    duration: 1,
+                    stagger: 0.1,
+                    ease: 'power4.out',
+                    delay: 0.1
+                });
             });
 
             // Hero parallax (blurred text)
@@ -492,6 +539,9 @@
         });
     });
 </script>
+
+<!-- Preloader (keep last) -->
+<script src="of-preloader.js"></script>
 
 </body>
 </html>
